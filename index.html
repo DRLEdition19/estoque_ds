@@ -1,27 +1,119 @@
-{
-  "name": "Estoque & Inventário Online",
-  "short_name": "Estoque",
-  "description": "Sistema online de controle de estoque e inventário com suporte offline",
-  "start_url": "/estoque_ds/",
-  "scope": "/estoque_ds/",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#ffffff",
-  "theme_color": "#1a1a1a",
-  "prefer_related_applications": false,
-  "categories": ["business", "productivity"],
-  "icons": [
-    {
-      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="description" content="Sistema online de controle de estoque e inventário.">
+    <title>Estoque & Inventário Online</title>
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Ícones atualizados -->
+    <link rel="icon" type="image/png" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    <link rel="apple-touch-icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Estoque">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%; height: 100dvh; overflow: hidden;
+            background-color: #faf8f5;
+            font-family: sans-serif; position: fixed;
+        }
+        #app-iframe {
+            width: 100%; height: 100%; border: none; display: block;
+        }
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: #faf8f5; z-index: 9999;
+        }
+        .loader.hidden { display: none; }
+        
+        /* Estilo do botão de instalar */
+        #btn-instalar {
+            display: none; /* Fica oculto até o navegador permitir */
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 10000;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader"><p>Carregando Estoque...</p></div>
+    
+    <!-- Botão flutuante de instalação -->
+    <button id="btn-instalar">⬇️ Instalar Aplicativo</button>
+    
+    <iframe 
+        id="app-iframe"
+        src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" 
+        allowfullscreen>
+    </iframe>
+    
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/estoque_ds/service-worker.js')
+                    .then(reg => console.log('SW Registrado!', reg))
+                    .catch(err => console.error('Erro no SW:', err));
+            });
+        }
+        
+        // Lógica de Instalação (PWA)
+        let deferredPrompt;
+        const btnInstalar = document.getElementById('btn-instalar');
+
+        // Captura o evento nativo que indica que o app pode ser instalado
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); // Impede o mini-infobar automático no mobile
+            deferredPrompt = e; // Salva o evento
+            btnInstalar.style.display = 'block'; // Mostra o botão para o usuário
+        });
+
+        // Quando o usuário clica no botão
+        btnInstalar.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt(); // Mostra a janela real de instalação
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('App instalado com sucesso');
+                }
+                deferredPrompt = null;
+                btnInstalar.style.display = 'none'; // Esconde o botão
+            }
+        });
+
+        // Quando o app terminar de instalar
+        window.addEventListener('appinstalled', () => {
+            btnInstalar.style.display = 'none';
+            console.log('Instalação concluída.');
+        });
+        
+        // Remover Loader
+        const loader = document.getElementById('loader');
+        document.getElementById('app-iframe').addEventListener('load', () => {
+            loader.classList.add('hidden');
+        });
+        setTimeout(() => loader.classList.add('hidden'), 5000);
+    </script>
+</body>
+</html>
