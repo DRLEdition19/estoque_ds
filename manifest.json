@@ -2,34 +2,31 @@
   "name": "Estoque & Inventário Online",
   "short_name": "Estoque",
   "description": "Sistema online de controle de estoque e inventário com suporte offline",
-  "start_url": "./",
-  "scope": "./",
-  "id": "./",
+  "start_url": "/estoque_ds/",
+  "scope": "/estoque_ds/",
   "display": "standalone",
-  "display_override": [
-    "window-controls-overlay",
-    "standalone"
-  ],
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#1a1a1a",
   "prefer_related_applications": false,
-  "categories": [
-    "business",
-    "productivity"
-  ],
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true",
+      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true","sizes":"192x192","type":"image/png","purpose":"any maskable",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true",
+      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true","sizes":"512x512","type":"image/png","purpose":"any maskable",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
+    },
+    {
+      "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true","sizes":"96x96","type":"image/png","purpose":"any maskable",
+      "sizes": "96x96",
+      "type": "image/svg+xml"
     }
   ],
   "shortcuts": [
@@ -37,13 +34,12 @@
       "name": "Abrir Estoque",
       "short_name": "Estoque",
       "description": "Acesso rápido ao sistema de estoque",
-      "url": "./",
+      "url": "/estoque_ds/",
       "icons": [
         {
-          "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true",
-          "sizes": "192x192",
-          "type": "image/png",
-          "purpose": "any"
+          "src": "https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true","sizes":"96x96","type":"image/png","purpose":"any maskable",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
         }
       ]
     }
