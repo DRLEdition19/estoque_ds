@@ -3,117 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <meta name="description" content="Sistema online de controle de estoque e inventário.">
+    <meta name="description" content="Sistema online de controle de estoque e inventário. Acesse pelo navegador, instale como app.">
+    <meta name="keywords" content="estoque, inventário, controle, online, PWA">
     <title>Estoque & Inventário Online</title>
     
-    <!-- Manifest -->
+    <!-- Manifest para PWA -->
     <link rel="manifest" href="manifest.json">
     
-    <!-- Ícones atualizados -->
+    <!-- Ícone da aba do navegador e fallback (Substituído o SVG por PNG do GitHub) -->
     <link rel="icon" type="image/png" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
-    <link rel="apple-touch-icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    <link rel="shortcut icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
     
+    <!-- Tema e suporte PWA -->
     <meta name="theme-color" content="#1a1a1a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Estoque">
     
+    <!-- Apple Touch Icons (Link oficial da logo) -->
+    <link rel="apple-touch-icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    
+    <!-- Cor de fundo inicial e tema -->
+    <meta name="background-color" content="#ffffff">
+    <meta name="color-scheme" content="light dark">
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body {
-            width: 100%; height: 100dvh; overflow: hidden;
-            background-color: #faf8f5;
-            font-family: sans-serif; position: fixed;
+        /* Remove todas as margens para o site ocupar 100% da tela */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        #app-iframe {
-            width: 100%; height: 100%; border: none; display: block;
-        }
-        .loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: #faf8f5; z-index: 9999;
-        }
-        .loader.hidden { display: none; }
         
-        /* Estilo do botão de instalar */
-        #btn-instalar {
-            display: none; /* Fica oculto até o navegador permitir */
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh; /* dynamic viewport height para móveis */
+            overflow: hidden;
+            background-color: #faf8f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #1a1a1a;
-            color: #ffffff;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            padding-top: max(0px, env(safe-area-inset-top));
+            padding-left: max(0px, env(safe-area-inset-left));
+            padding-right: max(0px, env(safe-area-inset-right));
+            padding-bottom: max(0px, env(safe-area-inset-bottom));
+        }
+        
+        /* Configura o iframe para tela cheia e sem bordas */
+        #app-iframe {
+            flex: 1;
+            width: 100%;
+            height: 100%;
             border: none;
-            padding: 15px 30px;
+            display: block;
+            background-color: #ffffff;
+        }
+        
+        /* Loader enquanto carrega */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f2ed 100%);
+            z-index: 9999;
+            text-align: center;
+        }
+        
+        .loader.hidden {
+            display: none;
+        }
+        
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(26, 26, 26, 0.1);
+            border-top: 4px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        .loader p {
             font-size: 16px;
-            font-weight: bold;
-            border-radius: 30px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 10000;
-            cursor: pointer;
+            color: #1a1a1a;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Modo app instalado */
+        body.app-installed {
+            background-color: #ffffff;
+        }
+        
+        body.app-installed .loader {
+            background-color: #faf8f5;
+        }
+        
+        /* Suporte para notches e safe areas */
+        @supports (padding: max(0px)) {
+            body {
+                padding-top: max(0px, env(safe-area-inset-top));
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+            }
+        }
+        
+        /* Orientação e viewport fixes */
+        @media (orientation: landscape) {
+            body {
+                height: auto;
+            }
+            
+            html, body {
+                height: 100vh;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="loader" id="loader"><p>Carregando Estoque...</p></div>
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <p>Carregando Estoque...</p>
+    </div>
     
-    <!-- Botão flutuante de instalação -->
-    <button id="btn-instalar">⬇️ Instalar Aplicativo</button>
-    
+    <!-- O link do seu Web App vai aqui -->
     <iframe 
         id="app-iframe"
         src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" 
-        allowfullscreen>
+        allowfullscreen 
+        allow="autoplay; fullscreen; camera; microphone; geolocation; accelerometer; gyroscope">
     </iframe>
     
+    <!-- Script do Service Worker e controle PWA -->
     <script>
-        // Registrar Service Worker
+        // Registrar Service Worker com tratamento robusto e caminho correto
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/estoque_ds/service-worker.js')
-                    .then(reg => console.log('SW Registrado!', reg))
-                    .catch(err => console.error('Erro no SW:', err));
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado com sucesso!', registration);
+                        
+                        setInterval(() => {
+                            registration.update();
+                        }, 3600000); // A cada 1 hora
+                        
+                        if (registration.waiting) {
+                            notifyUpdateAvailable();
+                        }
+                        
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'activated') {
+                                        notifyUpdateAvailable();
+                                    }
+                                });
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('❌ Erro ao registrar Service Worker:', error);
+                    });
             });
         }
         
-        // Lógica de Instalação (PWA)
+        function notifyUpdateAvailable() {
+            console.log('📢 Nova versão disponível!');
+        }
+        
+        // Detectar se está instalado como app
         let deferredPrompt;
-        const btnInstalar = document.getElementById('btn-instalar');
-
-        // Captura o evento nativo que indica que o app pode ser instalado
+        let isAppInstalled = false;
+        
+        // Trata o evento de instalação sem bloquear o comportamento do navegador
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Impede o mini-infobar automático no mobile
-            deferredPrompt = e; // Salva o evento
-            btnInstalar.style.display = 'block'; // Mostra o botão para o usuário
-        });
-
-        // Quando o usuário clica no botão
-        btnInstalar.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt(); // Mostra a janela real de instalação
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('App instalado com sucesso');
-                }
-                deferredPrompt = null;
-                btnInstalar.style.display = 'none'; // Esconde o botão
-            }
-        });
-
-        // Quando o app terminar de instalar
-        window.addEventListener('appinstalled', () => {
-            btnInstalar.style.display = 'none';
-            console.log('Instalação concluída.');
+            console.log('📱 App elegível para instalação.');
+            deferredPrompt = e;
         });
         
-        // Remover Loader
-        const loader = document.getElementById('loader');
-        document.getElementById('app-iframe').addEventListener('load', () => {
-            loader.classList.add('hidden');
+        window.addEventListener('appinstalled', () => {
+            isAppInstalled = true;
+            document.body.classList.add('app-installed');
+            console.log('✅ App instalado com sucesso!');
+            deferredPrompt = null;
         });
-        setTimeout(() => loader.classList.add('hidden'), 5000);
+        
+        // Verificar se já está em modo standalone
+        const isStandalone = window.navigator.standalone === true || 
+                            window.matchMedia('(display-mode: standalone)').matches ||
+                            window.matchMedia('(display-mode: fullscreen)').matches;
+        
+        if (isStandalone) {
+            isAppInstalled = true;
+            document.body.classList.add('app-installed');
+            console.log('✅ App rodando em modo standalone');
+        }
+        
+        // Monitorar mudanças no display mode
+        const mediaQuery = window.matchMedia('(display-mode: standalone)');
+        mediaQuery.addEventListener('change', (e) => {
+            if (e.matches) {
+                document.body.classList.add('app-installed');
+                console.log('📱 Modo standalone ativado');
+            }
+        });
+        
+        // Remover loader quando iframe carrega
+        const loader = document.getElementById('loader');
+        const appIframe = document.getElementById('app-iframe');
+        
+        let loaderTimeout;
+        
+        if (appIframe) {
+            appIframe.addEventListener('load', () => {
+                clearTimeout(loaderTimeout);
+                if (loader) {
+                    loader.classList.add('hidden');
+                }
+                console.log('✅ Aplicativo carregado');
+            });
+            
+            appIframe.addEventListener('error', () => {
+                console.error('❌ Erro ao carregar iframe');
+            });
+            
+            // Fallback para remover loader após 5 segundos
+            loaderTimeout = setTimeout(() => {
+                if (loader && !loader.classList.contains('hidden')) {
+                    loader.classList.add('hidden');
+                    console.warn('⚠️ Loader removido por timeout');
+                }
+            }, 5000);
+        }
+        
+        // Tratamento de conexão
+        window.addEventListener('online', () => console.log('🟢 Conexão restaurada'));
+        window.addEventListener('offline', () => console.log('🔴 Sem conexão - usando cache'));
+        
+        // Suporte a temas do sistema
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.style.colorScheme = 'dark';
+        }
     </script>
 </body>
 </html>
