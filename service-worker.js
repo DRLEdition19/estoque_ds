@@ -1,11 +1,12 @@
-const CACHE_NAME = 'estoque-inventario-v3';
-const ASSET_CACHE = 'estoque-assets-v3';
-const API_CACHE = 'estoque-api-v3';
+const CACHE_NAME = 'estoque-inventario-v4';
+const ASSET_CACHE = 'estoque-assets-v4';
+const API_CACHE = 'estoque-api-v4';
 
 const STATIC_ASSETS = [
   '/estoque_ds/',
   '/estoque_ds/index.html',
-  '/estoque_ds/manifest.json'
+  '/estoque_ds/manifest.json',
+  'https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true'
 ];
 
 // ============================================
