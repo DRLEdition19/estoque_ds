@@ -1,374 +1,153 @@
 const CACHE_NAME = 'estoque-inventario-v3';
-const ASSET_CACHE_NAME = 'estoque-assets-v3';
-const API_CACHE_NAME = 'estoque-api-v3';
+const ASSET_CACHE = 'estoque-assets-v3';
+const API_CACHE = 'estoque-api-v3';
 
 const STATIC_ASSETS = [
   '/estoque_ds/',
   '/estoque_ds/index.html',
-  '/estoque_ds/manifest.json',
-  '/estoque_ds/service-worker.js'
-];
-
-const GOOGLE_APPS_DOMAIN = 'https://script.google.com/macros/s/';
-const SKIP_CACHE = [
-  'https://script.google.com',
-  'https://www.google.com'
+  '/estoque_ds/manifest.json'
 ];
 
 // ============================================
-// 🔧 INSTALAÇÃO DO SERVICE WORKER
+// 🔧 INSTALAÇÃO
 // ============================================
 self.addEventListener('install', event => {
-  console.log('🔧 Service Worker instalado - versão v3');
+  console.log('🔧 Service Worker instalado - v3');
   
   event.waitUntil(
     Promise.all([
-      // Cache de assets estáticos
       caches.open(CACHE_NAME)
         .then(cache => {
-          console.log('💾 Cache estático criado');
+          console.log('💾 Cache criado');
           return cache.addAll(STATIC_ASSETS)
-            .catch(error => {
-              console.warn('⚠️ Aviso ao cachear assets:', error);
-              return Promise.resolve();
-            });
-        })
-        .catch(error => {
-          console.error('❌ Erro ao abrir cache:', error);
+            .catch(() => console.log('⚠️ Alguns assets não foram cacheados'));
         }),
-      
-      // Cache para assets
-      caches.open(ASSET_CACHE_NAME)
-        .then(cache => {
-          console.log('🖼️ Cache de assets criado');
-          return Promise.resolve();
-        })
+      caches.open(ASSET_CACHE),
+      caches.open(API_CACHE)
     ])
     .then(() => {
-      console.log('✅ Caches configurados com sucesso');
+      console.log('✅ Todos os caches configurados');
       return self.skipWaiting();
-    })
-    .catch(error => {
-      console.error('❌ Erro fatal ao configurar caches:', error);
     })
   );
 });
 
 // ============================================
-// ✅ ATIVAÇÃO DO SERVICE WORKER
+// ✅ ATIVAÇÃO
 // ============================================
 self.addEventListener('activate', event => {
   console.log('✅ Service Worker ativado');
   
   event.waitUntil(
     caches.keys()
-      .then(cacheNames => {
-        console.log('Caches encontrados:', cacheNames);
-        
+      .then(names => {
         return Promise.all(
-          cacheNames.map(cacheName => {
-            const validCaches = [CACHE_NAME, ASSET_CACHE_NAME, API_CACHE_NAME];
-            
-            if (!validCaches.includes(cacheName)) {
-              console.log('🗑️ Deletando cache antigo:', cacheName);
-              return caches.delete(cacheName);
+          names.map(name => {
+            if (![CACHE_NAME, ASSET_CACHE, API_CACHE].includes(name)) {
+              console.log('🗑️ Cache antigo deletado:', name);
+              return caches.delete(name);
             }
           })
         );
       })
-      .then(() => {
-        console.log('✅ Limpeza de caches concluída');
-        return self.clients.claim();
-      })
-      .catch(error => {
-        console.error('❌ Erro ao ativar:', error);
-      })
+      .then(() => self.clients.claim())
   );
 });
 
 // ============================================
-// 🌐 ESTRATÉGIA DE FETCH
+// 🌐 FETCH
 // ============================================
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
   
-  // Ignorar requisições não-GET
-  if (request.method !== 'GET') {
-    return;
-  }
+  if (request.method !== 'GET') return;
   
-  // ========== Google Apps Script - Network Only ==========
+  // Google Apps - network only
   if (url.origin === 'https://script.google.com') {
     return event.respondWith(
-      fetch(request, { 
-        credentials: 'include',
-        mode: 'no-cors'
-      })
+      fetch(request)
         .then(response => {
           if (response && response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(API_CACHE_NAME)
-              .then(cache => {
-                cache.put(request, responseClone);
-              })
-              .catch(() => {});
+            caches.open(API_CACHE).then(c => c.put(request, response.clone()));
           }
           return response;
         })
-        .catch(error => {
-          console.warn('❌ Erro ao fetch Google Apps:', error);
-          // Tentar cache como fallback
+        .catch(() => {
           return caches.match(request)
-            .then(cached => {
-              return cached || new Response(
-                'Indisponível offline. Conecte-se à internet.',
-                { status: 503 }
-              );
-            });
+            .then(c => c || new Response('Indisponível offline', { status: 503 }));
         })
     );
   }
   
-  // ========== Assets (CSS, JS, Imagens) - Cache First ==========
-  if (request.destination === 'style' || 
-      request.destination === 'script' || 
-      request.destination === 'image' ||
-      request.destination === 'font') {
-    
+  // Assets - cache first
+  if (['style', 'script', 'image', 'font'].includes(request.destination)) {
     return event.respondWith(
       caches.match(request)
         .then(cached => {
           if (cached) {
-            // Background update
-            fetch(request)
-              .then(freshResponse => {
-                if (freshResponse && freshResponse.status === 200) {
-                  caches.open(ASSET_CACHE_NAME)
-                    .then(cache => {
-                      cache.put(request, freshResponse);
-                    })
-                    .catch(() => {});
-                }
-              })
-              .catch(() => {});
-            
+            fetch(request).then(r => {
+              if (r.status === 200) {
+                caches.open(ASSET_CACHE).then(c => c.put(request, r));
+              }
+            }).catch(() => {});
             return cached;
           }
           
-          // Não está em cache, buscar da rede
           return fetch(request)
             .then(response => {
-              if (response && response.status === 200 && response.type !== 'error') {
-                const responseToCache = response.clone();
-                caches.open(ASSET_CACHE_NAME)
-                  .then(cache => {
-                    cache.put(request, responseToCache);
-                  })
-                  .catch(() => {});
+              if (response && response.status === 200) {
+                caches.open(ASSET_CACHE).then(c => c.put(request, response.clone()));
               }
               return response;
             });
         })
-        .catch(() => {
-          // Fallback para asset offline
-          if (request.destination === 'image') {
-            return new Response(
-              '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="#eee" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="#999">?</text></svg>',
-              { 
-                headers: { 'Content-Type': 'image/svg+xml' },
-                status: 200
-              }
-            );
-          }
-          return new Response('', { status: 503 });
-        })
+        .catch(() => new Response('', { status: 503 }))
     );
   }
   
-  // ========== Navegação - Network First ==========
+  // Navegação - network first
   if (request.mode === 'navigate') {
     return event.respondWith(
-      fetch(request, { credentials: 'include' })
+      fetch(request)
         .then(response => {
           if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(request, responseToCache);
-              })
-              .catch(() => {});
+            caches.open(CACHE_NAME).then(c => c.put(request, response.clone()));
           }
           return response;
         })
         .catch(() => {
           return caches.match(request)
-            .then(cached => {
-              if (cached) return cached;
-              
-              return caches.match('/estoque_ds/index.html')
-                .then(html => {
-                  return html || new Response(
-                    'Página indisponível. Verifique sua conexão.',
-                    { status: 503 }
-                  );
-                });
-            });
+            .then(c => c || caches.match('/estoque_ds/index.html')
+              .then(html => html || new Response('Offline', { status: 503 }))
+            );
         })
     );
   }
   
-  // ========== Padrão - Network First com Cache Fallback ==========
-  return event.respondWith(
-    fetch(request, { credentials: 'include' })
+  // Padrão - network first
+  event.respondWith(
+    fetch(request)
       .then(response => {
-        if (response && response.status === 200 && response.type !== 'error') {
-          const responseToCache = response.clone();
-          const cacheNameToUse = request.destination === '' ? CACHE_NAME : ASSET_CACHE_NAME;
-          caches.open(cacheNameToUse)
-            .then(cache => {
-              cache.put(request, responseToCache);
-            })
-            .catch(() => {});
+        if (response && response.status === 200) {
+          caches.open(CACHE_NAME).then(c => c.put(request, response.clone()));
         }
         return response;
       })
       .catch(() => {
         return caches.match(request)
-          .then(cached => {
-            return cached || new Response(
-              'Recurso indisponível offline.',
-              { status: 503 }
-            );
-          });
+          .then(c => c || new Response('', { status: 503 }));
       })
   );
 });
 
 // ============================================
-// 💬 MENSAGENS DO CLIENTE
+// 💬 MENSAGENS
 // ============================================
 self.addEventListener('message', event => {
-  console.log('📨 Mensagem recebida:', event.data?.type);
-  
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
-  if (event.data && event.data.type === 'CLIENTS_CLAIM') {
-    self.clients.claim();
-  }
-  
-  if (event.data && event.data.type === 'CACHE_INFO') {
-    caches.keys().then(keys => {
-      event.ports[0].postMessage({
-        type: 'CACHE_INFO_RESPONSE',
-        caches: keys
-      });
-    }).catch(() => {});
-  }
 });
 
-// ============================================
-// 📳 SINCRONIZAÇÃO EM BACKGROUND
-// ============================================
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-updates') {
-    event.waitUntil(
-      caches.open(CACHE_NAME)
-        .then(cache => cache.keys())
-        .then(requests => {
-          return Promise.all(
-            requests.map(request => {
-              return fetch(request, { credentials: 'include' })
-                .then(response => {
-                  if (response && response.status === 200) {
-                    return caches.open(CACHE_NAME)
-                      .then(cache => {
-                        cache.put(request, response);
-                      });
-                  }
-                })
-                .catch(() => {});
-            })
-          );
-        })
-        .then(() => {
-          return self.clients.matchAll();
-        })
-        .then(clients => {
-          clients.forEach(client => {
-            client.postMessage({
-              type: 'SYNC_COMPLETE',
-              timestamp: new Date().toISOString()
-            });
-          });
-        })
-        .catch(error => {
-          console.error('❌ Erro na sincronização:', error);
-        })
-    );
-  }
-});
-
-// ============================================
-// ⏰ PERIODIC BACKGROUND SYNC
-// ============================================
-self.addEventListener('periodicsync', event => {
-  if (event.tag === 'update-check') {
-    event.waitUntil(
-      self.clients.matchAll()
-        .then(clients => {
-          clients.forEach(client => {
-            client.postMessage({
-              type: 'PERIODIC_UPDATE',
-              timestamp: new Date().toISOString()
-            });
-          });
-        })
-        .catch(() => {})
-    );
-  }
-});
-
-// ============================================
-// 📨 PUSH NOTIFICATIONS
-// ============================================
-self.addEventListener('push', event => {
-  if (!event.data) return;
-  
-  const data = event.data.json();
-  const options = {
-    body: data.body || 'Nova atualização',
-    icon: data.icon || '/estoque_ds/data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect fill="%231a1a1a" width="192" height="192"/><text x="50%" y="50%" font-size="100" fill="%23fff" text-anchor="middle" dominant-baseline="central" font-family="Arial">📦</text></svg>',
-    badge: '/estoque_ds/badge.png',
-    tag: 'estoque-notification',
-    requireInteraction: false
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification('Estoque & Inventário', options)
-  );
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window' })
-      .then(clients => {
-        for (let client of clients) {
-          if (client.url === '/estoque_ds/' && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        if (self.clients.openWindow) {
-          return self.clients.openWindow('/estoque_ds/');
-        }
-      })
-  );
-});
-
-// ============================================
-// ✅ INICIALIZAÇÃO
-// ============================================
-console.log('✅ Service Worker v3 pronto para trabalhar');
+console.log('✅ Service Worker v3 pronto');
