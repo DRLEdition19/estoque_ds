@@ -1,61 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes, maximum-scale=5">
-    <meta name="description" content="Sistema online de controle de estoque e inventário. Acesse pelo navegador, instale como app.">
-    <meta name="keywords" content="estoque, inventário, controle, online, PWA">
-    <title>Estoque & Inventário Online</title>
-    
-       
-    <!-- Manifest para PWA -->
-    <link rel="manifest" href="/portfolio_dl/manifest.json">
-    
-    <!-- Ícone da aba do navegador -->
-    <link rel="icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
-    
-    <!-- Tema e suporte PWA -->
-    <meta name="theme-color" content="#1a1a1a">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Estoque & Inventário Online">
-    
-    <!-- Ícones para app -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/estoque_ds/icon-192.png">
-    <link rel="apple-touch-icon" href="/estoque_ds/icon-192.png">
-    
-    <style>
-        /* Remove todas as margens para o site ocupar 100% da tela */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Evita barra de rolagem dupla */
-            background-color: #faf8f5; /* Cor de fundo enquanto carrega */
-        }
-        
-        /* Configura o iframe para tela cheia e sem bordas */
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Sistema online de controle de estoque e inventário. Acesse pelo navegador ou instale como aplicativo.">
+<meta name="theme-color" content="#1a1a1a">
+<title>Estoque &amp; Inventário Online</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+<link rel="shortcut icon" type="image/png" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+<link rel="apple-touch-icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Estoque & Inventário Online">
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#faf8f5}
+iframe{width:100%;height:100%;height:100dvh;border:0;display:block}
+</style>
 </head>
 <body>
-    <!-- O link do seu Web App vai aqui -->
-    <iframe src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" allowfullscreen allow="autoplay; fullscreen"></iframe>
-    
-    <!-- Script do Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/estoque_ds/service-worker.js')
-                .then(registration => console.log('Service Worker registrado!'))
-                .catch(error => console.log('Erro ao registrar Service Worker:', error));
-        }
-    </script>
+<iframe src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" title="Estoque &amp; Inventário Online" allow="autoplay; fullscreen" allowfullscreen></iframe>
+<script>
+if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
+ window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(console.error));
+}
+</script>
 </body>
 </html>
