@@ -8,11 +8,11 @@
     <title>Estoque & Inventário Online</title>
     
     <!-- Manifest para PWA -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
     
-    <!-- Ícone da aba do navegador e fallback (Substituído o SVG por PNG do GitHub) -->
-    <link rel="icon" type="image/png" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
-    <link rel="shortcut icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    <!-- Ícone da aba do navegador e fallback -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a1a' width='32' height='32'/><text x='50%' y='50%' font-size='20' fill='%23fff' text-anchor='middle' dominant-baseline='central'>📦</text></svg>">
+    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a1a' width='32' height='32'/><text x='50%' y='50%' font-size='20' fill='%23fff' text-anchor='middle' dominant-baseline='central'>📦</text></svg>">
     
     <!-- Tema e suporte PWA -->
     <meta name="theme-color" content="#1a1a1a">
@@ -21,8 +21,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Estoque">
     
-    <!-- Apple Touch Icons (Link oficial da logo) -->
-    <link rel="apple-touch-icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a1a1a' width='180' height='180' rx='40'/><text x='50%' y='50%' font-size='100' fill='%23fff' text-anchor='middle' dominant-baseline='central'>📦</text></svg>">
     
     <!-- Cor de fundo inicial e tema -->
     <meta name="background-color" content="#ffffff">
@@ -155,30 +155,30 @@
     
     <!-- Script do Service Worker e controle PWA -->
     <script>
-        // Registrar Service Worker com tratamento robusto e caminho correto
+        // Registrar Service Worker com tratamento robusto
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
+                navigator.serviceWorker.register('service-worker.js', { scope: '/estoque_ds/' })
                     .then(registration => {
                         console.log('✅ Service Worker registrado com sucesso!', registration);
                         
+                        // Verificar updates periodicamente
                         setInterval(() => {
                             registration.update();
                         }, 3600000); // A cada 1 hora
                         
+                        // Notificar usuário sobre atualização
                         if (registration.waiting) {
                             notifyUpdateAvailable();
                         }
                         
                         registration.addEventListener('updatefound', () => {
                             const newWorker = registration.installing;
-                            if (newWorker) {
-                                newWorker.addEventListener('statechange', () => {
-                                    if (newWorker.state === 'activated') {
-                                        notifyUpdateAvailable();
-                                    }
-                                });
-                            }
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'activated') {
+                                    notifyUpdateAvailable();
+                                }
+                            });
                         });
                     })
                     .catch(error => {
@@ -187,6 +187,7 @@
             });
         }
         
+        // Notificar sobre atualização
         function notifyUpdateAvailable() {
             console.log('📢 Nova versão disponível!');
         }
@@ -195,12 +196,14 @@
         let deferredPrompt;
         let isAppInstalled = false;
         
-        // Trata o evento de instalação sem bloquear o comportamento do navegador
+        // Evento para mostrar prompt de instalação
         window.addEventListener('beforeinstallprompt', (e) => {
-            console.log('📱 App elegível para instalação.');
+            e.preventDefault();
             deferredPrompt = e;
+            console.log('📱 App pode ser instalado');
         });
         
+        // Quando o app é instalado
         window.addEventListener('appinstalled', () => {
             isAppInstalled = true;
             document.body.classList.add('app-installed');
@@ -257,8 +260,13 @@
         }
         
         // Tratamento de conexão
-        window.addEventListener('online', () => console.log('🟢 Conexão restaurada'));
-        window.addEventListener('offline', () => console.log('🔴 Sem conexão - usando cache'));
+        window.addEventListener('online', () => {
+            console.log('🟢 Conexão restaurada');
+        });
+        
+        window.addEventListener('offline', () => {
+            console.log('🔴 Sem conexão - usando cache');
+        });
         
         // Suporte a temas do sistema
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
