@@ -2,11 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Sistema online de controle de estoque e inventário. Acesse pelo navegador, instale como app.">
     <title>Estoque & Inventário Online</title>
     
     <!-- Manifest para PWA -->
-    <link rel="manifest" href="/estoque_ds/manifest.json">
+    <link rel="manifest" href="manifest.json">
     
     <!-- Ícone da aba do navegador -->
     <link rel="icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
@@ -15,22 +16,38 @@
     <meta name="theme-color" content="#1a1a1a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Estoque & Inventário">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Estoque">
     
     <!-- Ícones para app -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/estoque_ds/icon-192.png">
-    <link rel="apple-touch-icon" href="/estoque_ds/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    
+    <!-- Cor de fundo inicial -->
+    <meta name="background-color" content="#ffffff">
     
     <style>
         /* Remove todas as margens para o site ocupar 100% da tela */
-        body, html {
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Evita barra de rolagem dupla */
-            background-color: #faf8f5; /* Cor de fundo enquanto carrega */
+            overflow: hidden;
+            background-color: #faf8f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body.app-installed {
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         /* Configura o iframe para tela cheia e sem bordas */
@@ -40,19 +57,97 @@
             border: none;
             display: block;
         }
+        
+        /* Loader enquanto carrega */
+        .loader {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 9999;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a1a1a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <p>Carregando Estoque...</p>
+    </div>
+    
     <!-- O link do seu Web App vai aqui -->
-    <iframe src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <iframe 
+        id="app-iframe"
+        src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" 
+        allowfullscreen 
+        allow="autoplay; fullscreen; camera; microphone; geolocation">
+    </iframe>
     
     <!-- Script do Service Worker -->
     <script>
+        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/estoque_ds/service-worker.js')
-                .then(registration => console.log('Service Worker registrado!'))
-                .catch(error => console.log('Erro ao registrar Service Worker:', error));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado com sucesso!');
+                        
+                        // Verificar updates periodicamente
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000); // A cada 1 minuto
+                    })
+                    .catch(error => {
+                        console.log('⚠️ Erro ao registrar Service Worker:', error);
+                    });
+            });
         }
+        
+        // Detectar se está instalado como app
+        let deferredPrompt;
+        let isAppInstalled = false;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('📱 App pode ser instalado');
+        });
+        
+        window.addEventListener('appinstalled', () => {
+            isAppInstalled = true;
+            document.body.classList.add('app-installed');
+            console.log('✅ App instalado com sucesso!');
+            deferredPrompt = null;
+        });
+        
+        // Simular display mode
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            isAppInstalled = true;
+            document.body.classList.add('app-installed');
+        }
+        
+        // Remover loader quando iframe carrega
+        document.getElementById('app-iframe').addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
