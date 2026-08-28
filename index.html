@@ -10,9 +10,9 @@
     <!-- Manifest para PWA -->
     <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
     
-    <!-- Ícone da aba do navegador e fallback -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a1a' width='32' height='32'/><text x='50%' y='50%' font-size='20' fill='%23fff' text-anchor='middle' dominant-baseline='central'>📦</text></svg>">
-    <link rel="shortcut icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a1a' width='32' height='32'/><text x='50%' y='50%' font-size='20' fill='%23fff' text-anchor='middle' dominant-baseline='central'>📦</text></svg>">
+    <!-- Ícone da aba do navegador -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DRLEdition19/estoque_ds/main/Logo%20DS%20com%20elipse.png">
+    <link rel="shortcut icon" href="https://raw.githubusercontent.com/DRLEdition19/estoque_ds/main/Logo%20DS%20com%20elipse.png">
     
     <!-- Tema e suporte PWA -->
     <meta name="theme-color" content="#1a1a1a">
@@ -21,8 +21,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Estoque">
     
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a1a1a' width='180' height='180' rx='40'/><text x='50%' y='50%' font-size='100' fill='%23fff' text-anchor='middle' dominant-baseline='central'>📦</text></svg>">
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/DRLEdition19/estoque_ds/main/Logo%20DS%20com%20elipse.png">
     
     <!-- Cor de fundo inicial e tema -->
     <meta name="background-color" content="#ffffff">
@@ -148,6 +148,7 @@
     <!-- O link do seu Web App vai aqui -->
     <iframe 
         id="app-iframe"
+        title="Aplicação Estoque"
         src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" 
         allowfullscreen 
         allow="autoplay; fullscreen; camera; microphone; geolocation; accelerometer; gyroscope">
@@ -158,9 +159,12 @@
         // Registrar Service Worker com tratamento robusto
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js', { scope: '/estoque_ds/' })
+                navigator.serviceWorker.register('service-worker.js', { 
+                    scope: '/estoque_ds/',
+                    updateViaCache: 'none'
+                })
                     .then(registration => {
-                        console.log('✅ Service Worker registrado com sucesso!', registration);
+                        console.log('✅ Service Worker registrado com sucesso!');
                         
                         // Verificar updates periodicamente
                         setInterval(() => {
@@ -189,21 +193,19 @@
         
         // Notificar sobre atualização
         function notifyUpdateAvailable() {
-            console.log('📢 Nova versão disponível!');
+            console.log('📢 Nova versão do Estoque disponível! Reabra o app para atualizar.');
         }
         
         // Detectar se está instalado como app
         let deferredPrompt;
         let isAppInstalled = false;
         
-        // Evento para mostrar prompt de instalação
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             console.log('📱 App pode ser instalado');
         });
         
-        // Quando o app é instalado
         window.addEventListener('appinstalled', () => {
             isAppInstalled = true;
             document.body.classList.add('app-installed');
