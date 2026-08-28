@@ -1,6 +1,6 @@
-# 📱 Portfólio D&L Personalizados - PWA (Progressive Web App)
+# 📱 Estoque & Inventário Online - PWA (Progressive Web App)
 
-Seu portfólio agora é um **aplicativo web instalável**! Isso permite que visitantes instalem seu site como um app nativo no celular.
+Seu sistema agora é um **aplicativo web instalável**! Isso permite que usuários instalem seu site como um app nativo no celular.
 
 ## ✅ O que foi configurado
 
@@ -27,14 +27,14 @@ Seu portfólio agora é um **aplicativo web instalável**! Isso permite que visi
 ## 🚀 Como usar no celular
 
 ### **Android (Chrome, Edge, Samsung Internet)**
-1. Acesse seu portfólio no celular
+1. Acesse seu sistema no celular
 2. Toque no menu (⋮) ou pressione a barra de pesquisa
 3. Procure por **"Instalar app"** ou **"Adicionar à tela inicial"**
 4. Confirme a instalação
 5. Pronto! Abre como um app nativo!
 
 ### **iPhone/iPad (Safari)**
-1. Acesse seu portfólio no Safari
+1. Acesse seu sistema no Safari
 2. Toque no botão **Compartilhar** (seta para cima)
 3. Role e toque em **"Adicionar à tela inicial"**
 4. Escolha o nome e confirme
@@ -52,7 +52,7 @@ Para mudar o nome, cor ou ícone, edite o arquivo `manifest.json`:
   "background_color": "#ffffff",      // Cor de carregamento
   "icons": [
     {
-      "src": "/portfolio_dl/icon-192.png",  // Caminho do ícone 192x192
+      "src": "/estoque_ds/icon-192.png",  // Caminho do ícone 192x192
       "sizes": "192x192"
     }
   ]
@@ -91,4 +91,4 @@ Depois faça upload dos arquivos para o repositório nas raízes do projeto.
 
 ---
 
-**Seu portfólio agora está pronto para ser instalado como app! 🎉**
+**Seu sistema agora está pronto para ser instalado como app! 🎉**

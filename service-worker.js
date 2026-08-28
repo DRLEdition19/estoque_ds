@@ -1,8 +1,8 @@
-const CACHE_NAME = 'portfolio-dl-v1';
+const CACHE_NAME = 'estoque-inventario-v1';
 const CACHE_URLS = [
-  '/portfolio_dl/',
-  '/portfolio_dl/index.html',
-  '/portfolio_dl/manifest.json'
+  '/estoque_ds/',
+  '/estoque_ds/index.html',
+  '/estoque_ds/manifest.json'
 ];
 
 // Instalação do Service Worker
@@ -60,7 +60,7 @@ self.addEventListener('fetch', event => {
         // Se falhar, tenta do cache
         return caches.match(event.request)
           .then(response => {
-            return response || caches.match('/portfolio_dl/index.html');
+            return response || caches.match('/estoque_ds/index.html');
           });
       })
   );

@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfólio - D&L Personalizados</title>
+    <title>Estoque & Inventário Online</title>
     
     <!-- Manifest para PWA -->
-    <link rel="manifest" href="/portfolio_dl/manifest.json">
+    <link rel="manifest" href="/estoque_ds/manifest.json">
     
     <!-- Ícone da aba do navegador -->
-    <link rel="icon" href="https://github.com/DRLEdition19/portifolio_dl/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
+    <link rel="icon" href="https://github.com/DRLEdition19/estoque_ds/blob/main/Logo%20DS%20com%20elipse.png?raw=true">
     
     <!-- Tema e suporte PWA -->
     <meta name="theme-color" content="#1a1a1a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Portfolio D&L">
+    <meta name="apple-mobile-web-app-title" content="Estoque & Inventário">
     
     <!-- Ícones para app -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/portfolio_dl/icon-192.png">
-    <link rel="apple-touch-icon" href="/portfolio_dl/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/estoque_ds/icon-192.png">
+    <link rel="apple-touch-icon" href="/estoque_ds/icon-192.png">
     
     <style>
         /* Remove todas as margens para o site ocupar 100% da tela */
@@ -44,12 +44,12 @@
 </head>
 <body>
     <!-- O link do seu Web App vai aqui -->
-    <iframe src="https://script.google.com/macros/s/AKfycbyIkDZciVKo_e7MYMmM56UQ2SesIPkgD-1W4CXOdxV-35JBXmF_mhPp4grynz0WDF3z/exec" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <iframe src="https://script.google.com/macros/s/AKfycbyBplSdXH5rE21upSimmIDcOMwPnsR3GQE0PPA7nC1mflFBQySQdQrNLWLPgj0hXrSXsw/exec" allowfullscreen allow="autoplay; fullscreen"></iframe>
     
     <!-- Script do Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/portfolio_dl/service-worker.js')
+            navigator.serviceWorker.register('/estoque_ds/service-worker.js')
                 .then(registration => console.log('Service Worker registrado!'))
                 .catch(error => console.log('Erro ao registrar Service Worker:', error));
         }
