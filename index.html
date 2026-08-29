@@ -10,20 +10,33 @@
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/DRLEdition19/estoque_ds/refs/heads/main/Logo%20DS%20com%20elipse.png">
     <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/DRLEdition19/estoque_ds/refs/heads/main/Logo%20DS%20com%20elipse.png">
     
-    <meta name="theme-color" content="#1a1a1a">
+    <!-- Cor da barra de navegação/status dinâmica conforme o tema -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
+    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Estoque">
     
     <style>
+        :root {
+            --bg-color: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+            }
+        }
+
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #faf8f5;
+            background-color: var(--bg-color);
         }
         
         iframe {
@@ -31,6 +44,7 @@
             height: 100%;
             border: none;
             display: block;
+            background-color: transparent;
         }
     </style>
 </head>
