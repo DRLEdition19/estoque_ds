@@ -19,6 +19,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Estoque">
     
+    <!-- Permissões de câmera, microfone e localização -->
+    <meta name="permissions" content="camera microphone geolocation">
+    
     <style>
         :root {
             --bg-color: #ffffff;
@@ -49,16 +52,85 @@
     </style>
 </head>
 <body>
-    <iframe src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <iframe 
+        src="https://script.google.com/macros/s/AKfycby4zj1N0SI_rN4F33chiRuzGThf5fNuQfcwkuX7MMqaUucx08RN3iTb-1GJOGFpCliDUw/exec" 
+        allowfullscreen 
+        allow="autoplay; fullscreen; camera; microphone; geolocation; accelerometer; gyroscope; magnetometer; payment">
+    </iframe>
     
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+        // Função para solicitar permissão de câmera
+        function requestCameraPermission() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(stream => {
+                        console.log('Permissão de câmera concedida!');
+                        // Parar o stream imediatamente após receber permissão
+                        stream.getTracks().forEach(track => track.stop());
+                    })
+                    .catch(err => {
+                        console.warn('Permissão de câmera negada ou indisponível:', err);
+                    });
+            }
+        }
+
+        // Solicitar permissão de câmera ao carregar a página
+        window.addEventListener('load', () => {
+            // Registrar Service Worker (funcionalidade existente)
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/estoque_ds/service-worker.js', { scope: '/estoque_ds/' })
                     .then(() => console.log('Service Worker registrado com sucesso!'))
                     .catch(err => console.error('Erro ao registrar Service Worker:', err));
-            });
+            }
+
+            // Solicitar permissão de câmera
+            requestCameraPermission();
+
+            // Aguardar consentimento do usuário antes de solicitar câmera (melhor UX)
+            // Descomente a linha abaixo se preferir aguardar interação do usuário
+            // document.body.addEventListener('click', requestCameraPermission, { once: true });
+        });
+
+        // Função para habilitar câmera em resposta a um evento de usuário (alternativa)
+        function enableCameraOnDemand() {
+            requestCameraPermission();
         }
+
+        // Comunicação entre a página e o iframe para passar dados do QR Code
+        window.addEventListener('message', function(event) {
+            // Verificar se a mensagem veio do leitor QR
+            if (event.data && event.data.type === 'QR_CODE_RESULT') {
+                console.log('Código QR lido:', event.data.data);
+                
+                // Repassar para o iframe do Google Apps Script
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                        type: 'QR_CODE_RESULT',
+                        data: event.data.data
+                    }, '*');
+                }
+            }
+        });
+
+        // Expor função globalmente para ser chamada por botões HTML
+        window.openQRCodeScanner = function() {
+            // Abrir o leitor QR em uma nova janela (contorna bloqueio de iframe)
+            window.open('qrcode_scanner.html', 'QRCodeScanner', 'width=500,height=700,resizable=yes');
+        };
+
+        // Função para receber resultado do leitor QR (alternativa com callback)
+        window.onQRCodeScanned = function(code) {
+            console.log('Código escaneado:', code);
+            // Processar o código aqui
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({
+                    type: 'QR_CODE_RESULT',
+                    data: code
+                }, '*');
+            }
+        };
     </script>
 </body>
 </html>
